@@ -1,0 +1,18 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+url="$1"
+if [ -z "$url" ]; then
+  echo "Usage: yt-transcript <YouTube URL>"
+  exit 1
+fi
+
+yt-dlp --write-auto-sub --sub-lang en --skip-download "$url"
+video_id=$(yt-dlp --get-id "$url")
+vtt_file=$(ls *"$video_id"*.en.vtt | head -n1)
+
+if [ -f "$vtt_file" ]; then
+  sed -n '/^[0-9]*:[0-9]*:[0-9]*\\./!p' "$vtt_file" | sed '/^$/d' > "${video_id}_transcript.txt"
+  echo "✅ Saved: ${video_id}_transcript.txt"
+else
+  echo "❌ .vtt file not found"
+fi
